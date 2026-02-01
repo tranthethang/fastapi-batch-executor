@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     
     # Execution Control
     CONCURRENCY_LIMIT: int = 3 # Number of concurrent Gemini requests
+    APP_PORT: int = 60062
+    DEBUG: bool = False
 
     class Config:
         env_file = ".env"

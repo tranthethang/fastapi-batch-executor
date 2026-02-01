@@ -19,14 +19,16 @@ class GeminiService:
         """
         async with semaphore:
             try:
+                logger.info(f"Starting Gemini task with {len(global_files)} files.")
                 # Prepare message parts: Files first, then the Prompt
                 parts = []
                 for file_info in global_files:
-                    # Expecting {'role': '...', 'uri': '...'}
+                    # Expecting {'role': '...', 'uri': '...', 'mime_type': '...'}
+                    mime_type = file_info.get('mime_type', 'text/plain')
                     parts.append({
                         "file_data": {
                             "file_uri": file_info['uri'],
-                            "mime_type": "text/plain" # Or detect mime-type dynamically
+                            "mime_type": mime_type
                         }
                     })
                 
@@ -39,7 +41,12 @@ class GeminiService:
                     lambda: self.model.generate_content(parts)
                 )
                 
+                if not response or not response.text:
+                    logger.warning("Gemini returned an empty response.")
+                    return ""
+                
+                logger.info("Gemini task completed successfully.")
                 return response.text
             except Exception as e:
-                logger.error(f"Gemini Task Error: {str(e)}")
+                logger.error(f"Gemini Task Error: {str(e)}", exc_info=True)
                 raise e
