@@ -6,7 +6,7 @@ alwaysApply: true
 # fastapi-batch-executor Information
 
 ## Summary
-**fastapi-batch-executor** is a FastAPI-based microservice designed for executing AI tasks, either individually or in batches. It utilizes the **Google Gemini API** (specifically `gemini-1.5-flash`) for content generation and **AWS S3** for storing consolidated results. The service supports both synchronous and asynchronous execution modes, using background tasks and webhooks for notification upon completion.
+**fastapi-batch-executor** is a FastAPI-based microservice designed for executing AI tasks, either individually or in batches. It utilizes the **Google Gemini API** (specifically `gemini-2.0-flash`) for content generation and **AWS S3** for storing consolidated results. The service supports both synchronous and asynchronous execution modes, using background tasks and webhooks for notification upon completion.
 
 ## Structure
 The project follows a standard FastAPI structure:

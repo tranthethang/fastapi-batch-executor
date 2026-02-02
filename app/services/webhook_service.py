@@ -1,7 +1,7 @@
 import httpx
-import logging
 
-logger = logging.getLogger(__name__)
+from app.logger import logger
+
 
 class WebhookService:
     async def notify(self, url: str, data: dict):
@@ -16,3 +16,6 @@ class WebhookService:
             except Exception as e:
                 logger.error(f"Webhook Notification Failed: {str(e)}")
                 return False
+
+
+webhook_service = WebhookService()

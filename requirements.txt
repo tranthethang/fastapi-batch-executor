@@ -1,7 +1,9 @@
 fastapi
 uvicorn[standard]
-pydantic-settings
 google-generativeai
 aioboto3
 httpx
 python-multipart
+python-dotenv
+black
+isort
