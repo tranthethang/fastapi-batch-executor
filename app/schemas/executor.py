@@ -1,6 +1,11 @@
-from typing import List, Optional
+from typing import List, Literal, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, model_validator
+
+
+class FileItem(BaseModel):
+    uri: str
+    mime_type: str = "text/plain"
 
 
 class TaskItem(BaseModel):
@@ -10,11 +15,17 @@ class TaskItem(BaseModel):
 
 class BatchRequest(BaseModel):
     project_id: str
-    mode: str = "sync"  # sync or async
-    global_files: List[dict]
-    tasks: List[TaskItem]
+    mode: Literal["sync", "async"] = "sync"
+    global_files: List[FileItem] = Field(default_factory=list)
+    tasks: List[TaskItem] = Field(..., min_length=1)
     webhook_url: Optional[str] = None
-    s3_path_prefix: Optional[str] = "ai-output/"
+    s3_path_prefix: str = "ai-output/"
+
+    @model_validator(mode="after")
+    def validate_webhook_for_async(self) -> "BatchRequest":
+        if self.mode == "async" and not self.webhook_url:
+            raise ValueError("webhook_url is required when mode is 'async'")
+        return self
 
 
 class TaskResult(BaseModel):

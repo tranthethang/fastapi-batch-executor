@@ -1,7 +1,9 @@
 # verify.py - Verification for fastapi-batch-executor
 import os
 
+import boto3
 import requests
+from botocore.config import Config as BotoConfig
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -11,8 +13,37 @@ HEALTH_URL = f"{BASE_URL}/health"
 EXECUTE_URL = f"{BASE_URL}/batch/run"
 
 
+def check_s3_connection():
+    print(f"[*] Testing S3/MinIO connection...")
+    s3_endpoint = os.getenv("S3_ENDPOINT_URL")
+    s3_bucket = os.getenv("S3_BUCKET_NAME")
+    aws_access_key = os.getenv("AWS_ACCESS_KEY_ID")
+    aws_secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+    aws_region = os.getenv("AWS_REGION", "us-east-1")
+
+    try:
+        s3_client = boto3.client(
+            "s3",
+            endpoint_url=s3_endpoint,
+            aws_access_key_id=aws_access_key,
+            aws_secret_access_key=aws_secret_key,
+            region_name=aws_region,
+            config=BotoConfig(
+                signature_version="s3v4", s3={"addressing_style": "path"}
+            ),
+        )
+        # Try to list objects (minimal permission check)
+        s3_client.list_objects_v2(Bucket=s3_bucket, MaxKeys=1)
+        print(f"[+] S3 connection successful (Bucket: {s3_bucket})")
+    except Exception as e:
+        print(f"[-] S3 connection failed: {str(e)}")
+
+
 def run_verification():
     print("=== FASTAPI BATCH EXECUTOR VERIFICATION ===")
+
+    # Test 0: S3 Check
+    check_s3_connection()
 
     # Test 1: Health Check
     print(f"[*] Testing connection to {HEALTH_URL}...")

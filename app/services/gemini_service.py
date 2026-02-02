@@ -24,13 +24,12 @@ class GeminiService:
                 # Prepare message parts: Files first, then the Prompt
                 parts = []
                 for file_info in global_files:
-                    # Expecting {'role': '...', 'uri': '...', 'mime_type': '...'}
-                    mime_type = file_info.get("mime_type", "text/plain")
+                    # file_info is a FileItem object from app.schemas.executor
                     parts.append(
                         {
                             "file_data": {
-                                "file_uri": file_info["uri"],
-                                "mime_type": mime_type,
+                                "file_uri": file_info.uri,
+                                "mime_type": file_info.mime_type,
                             }
                         }
                     )

@@ -1,4 +1,5 @@
 import aioboto3
+from botocore.config import Config as BotoConfig
 
 from app.config import Config
 
@@ -16,6 +17,10 @@ class StorageService:
             region_name=Config.AWS_REGION,
             aws_access_key_id=Config.AWS_ACCESS_KEY_ID,
             aws_secret_access_key=Config.AWS_SECRET_ACCESS_KEY,
+            endpoint_url=Config.S3_ENDPOINT_URL,
+            config=BotoConfig(
+                signature_version="s3v4", s3={"addressing_style": "path"}
+            ),
         ) as s3:
             await s3.put_object(
                 Bucket=Config.S3_BUCKET_NAME,
