@@ -4,6 +4,6 @@
     
     // Help Pylance find the libraries
     "python.analysis.extraPaths": [
-        "${workspaceFolder}/.venv/lib/python3.x/site-packages"
+        "${workspaceFolder}/.venv/lib/python3.10/site-packages"
     ]
 }
