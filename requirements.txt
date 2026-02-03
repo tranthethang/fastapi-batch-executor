@@ -6,5 +6,10 @@ httpx
 python-multipart
 python-dotenv
 boto3
+pydantic-settings
 black
 isort
+pytest
+pytest-asyncio
+pytest-cov
+asgi-lifespan
