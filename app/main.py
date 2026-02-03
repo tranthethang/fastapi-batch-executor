@@ -2,8 +2,8 @@ import uvicorn
 from fastapi import FastAPI
 
 from app.api.executor import router as executor_router
-from app.config import Config
-from app.logger import logger
+from app.core.config import Config
+from app.core.logger import logger
 
 app = FastAPI(
     title="fastapi-batch-executor",
