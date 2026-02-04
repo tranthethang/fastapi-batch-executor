@@ -25,7 +25,6 @@
     "files.exclude": {
         "**/node_modules": true,
         "**/vendor": true,
-        "**/.venv": true,
         "**/.git": true,
         "**/__pycache__": true
     },

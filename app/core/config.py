@@ -1,8 +1,7 @@
 """
 Configuration management module for the FastAPI application.
-
-This module uses Pydantic Settings to load configuration from environment variables
-and .env files. It provides structured access to application, Gemini, Redis, and S3 settings.
+This module uses Pydantic Settings to load and validate environment variables
+from a .env file or the system environment.
 """
 
 from typing import Optional
@@ -14,47 +13,35 @@ from app.services.configs import GeminiConfig, RedisConfig, S3Config
 
 class Settings(BaseSettings):
     """
-    Application settings class using Pydantic Settings.
-
-    Attributes:
-        APP_NAME (str): Name of the application.
-        DEBUG (bool): Debug mode flag.
-        APP_PORT (int): Port number for the application.
-        GEMINI_API_KEY (str, optional): API key for Google Gemini.
-        GEMINI_MODEL (str): Model name for Gemini.
-        CONCURRENCY_LIMIT (int): Concurrency limit for Gemini requests.
-        AWS_ACCESS_KEY_ID (str, optional): AWS Access Key ID.
-        AWS_SECRET_ACCESS_KEY (str, optional): AWS Secret Access Key.
-        AWS_REGION (str): AWS region.
-        S3_BUCKET_NAME (str, optional): S3 bucket name.
-        S3_ENDPOINT_URL (str, optional): Custom S3 endpoint URL (for MinIO).
-        REDIS_HOST (str): Redis host address.
-        REDIS_PORT (int): Redis port number.
-        REDIS_PASSWORD (str, optional): Redis password.
-        REDIS_DB (int): Redis database index.
+    Application-wide settings container.
+    Automatically maps environment variables (e.g., APP_NAME) to class attributes.
     """
 
+    # Configuration for the Pydantic Settings loader
     model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", extra="ignore"
+        env_file=".env",  # Path to the environment file
+        env_file_encoding="utf-8",  # Encoding for reading the env file
+        extra="ignore",  # Ignore extra environment variables not defined here
     )
 
+    # Basic Application Metadata
     APP_NAME: str = "fastapi-boilerplate"
     DEBUG: bool = False
     APP_PORT: int = 80
 
-    # Gemini API Configuration
+    # Google Gemini API configuration parameters
     GEMINI_API_KEY: Optional[str] = None
     GEMINI_MODEL: str = "gemini-2.0-flash"
-    CONCURRENCY_LIMIT: int = 5
+    CONCURRENCY_LIMIT: int = 5  # Max concurrent requests allowed to Gemini API
 
-    # AWS S3 Configuration
+    # AWS S3 / Cloud Storage configuration
     AWS_ACCESS_KEY_ID: Optional[str] = None
     AWS_SECRET_ACCESS_KEY: Optional[str] = None
     AWS_REGION: str = "ap-southeast-1"
     S3_BUCKET_NAME: Optional[str] = None
-    S3_ENDPOINT_URL: Optional[str] = None
+    S3_ENDPOINT_URL: Optional[str] = None  # Custom endpoint for MinIO or localstack
 
-    # Redis Configuration
+    # Redis connectivity settings
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
     REDIS_PASSWORD: Optional[str] = None
@@ -62,7 +49,12 @@ class Settings(BaseSettings):
 
     @property
     def gemini(self) -> GeminiConfig:
-        """Get Gemini service configuration."""
+        """
+        Constructs a GeminiConfig object for internal service consumption.
+
+        Returns:
+            GeminiConfig: Validated configuration for the GeminiService.
+        """
         return GeminiConfig(
             api_key=self.GEMINI_API_KEY,
             model_name=self.GEMINI_MODEL,
@@ -71,7 +63,12 @@ class Settings(BaseSettings):
 
     @property
     def redis(self) -> RedisConfig:
-        """Get Redis service configuration."""
+        """
+        Constructs a RedisConfig object for internal service consumption.
+
+        Returns:
+            RedisConfig: Validated configuration for the RedisService.
+        """
         return RedisConfig(
             host=self.REDIS_HOST,
             port=self.REDIS_PORT,
@@ -81,7 +78,12 @@ class Settings(BaseSettings):
 
     @property
     def s3(self) -> S3Config:
-        """Get S3 service configuration."""
+        """
+        Constructs an S3Config object for internal service consumption.
+
+        Returns:
+            S3Config: Validated configuration for the S3Service.
+        """
         return S3Config(
             access_key_id=self.AWS_ACCESS_KEY_ID,
             secret_access_key=self.AWS_SECRET_ACCESS_KEY,
@@ -91,16 +93,15 @@ class Settings(BaseSettings):
         )
 
 
-# Create a singleton instance
+# Global singleton instance providing access to all application settings
 settings = Settings()
 
 
-# Maintain backward compatibility for existing code during transition
 class Config:
     """
-    Legacy configuration class for backward compatibility.
-
-    Provides static access to settings loaded from the `Settings` instance.
+    Legacy configuration bridge.
+    Provides static access to values from the 'settings' instance to ensure
+    compatibility with older parts of the codebase.
     """
 
     APP_NAME = settings.APP_NAME
