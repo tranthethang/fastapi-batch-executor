@@ -79,7 +79,7 @@ async def test_run_async_batch_success(executor, batch_request):
         # Mock datetime and time for predictable S3 key
         mock_now = MagicMock()
         mock_now.strftime.return_value = "2024/01/01"
-        mock_datetime.utcnow.return_value = mock_now
+        mock_datetime.now.return_value = mock_now
         mock_time.time.return_value = 1234567890
         mock_secrets.choice.return_value = "a"
 

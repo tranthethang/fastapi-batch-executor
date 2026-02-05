@@ -8,7 +8,7 @@ import asyncio
 import secrets
 import string
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.core.logger import logger
 from app.schemas.executor import BatchRequest, TaskResult
@@ -86,7 +86,7 @@ class ExecutorImpl:
 
         # 3. Generate a unique S3 storage key
         # Path structure: {PREFIX}/yyyy/mm/dd/{project_id}_{timestamp}_{random_4}.md
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         date_path = now.strftime("%Y/%m/%d")
         timestamp = int(time.time())
         random_str = "".join(
