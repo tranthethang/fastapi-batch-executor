@@ -58,7 +58,7 @@ class ExecutorImpl:
         # Map the raw results back to their corresponding task IDs
         for i, res in enumerate(raw_results):
             task_id = payload.tasks[i].task_id
-            if isinstance(res, Exception):
+            if isinstance(res, BaseException):
                 # If the coroutine raised an exception, record the error
                 logger.error(f"Task {task_id} failed: {str(res)}")
                 results.append(TaskResult(task_id=task_id, error=str(res)))
