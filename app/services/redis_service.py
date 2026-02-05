@@ -5,6 +5,8 @@ This module provides the RedisService class which handles key-value storage oper
 expiration, and integrates with the BaseService hook system.
 """
 
+from typing import Any, Optional, cast
+
 import redis.asyncio as redis
 
 from app.core.logger import logger
@@ -36,7 +38,7 @@ class RedisService(BaseService):
             decode_responses=config.decode_responses,
         )
 
-    async def set(self, key: str, value: str, expire: int = None):
+    async def set(self, key: str, value: str, expire: Optional[int] = None):
         """
         Set a value in Redis, wrapped with service hooks.
 
@@ -47,7 +49,7 @@ class RedisService(BaseService):
         """
         return await self.execute_with_hooks("set", self._set, key, value, expire)
 
-    async def _set(self, key: str, value: str, expire: int = None):
+    async def _set(self, key: str, value: str, expire: Optional[int] = None):
         """Internal method to set value in Redis."""
         try:
             await self.client.set(key, value, ex=expire)
@@ -100,7 +102,7 @@ class RedisService(BaseService):
             bool: True if healthy, False otherwise.
         """
         try:
-            return await self.client.ping()
+            return await cast(Any, self.client.ping())
         except Exception as e:
             logger.error(f"Redis ping error: {str(e)}")
             return False

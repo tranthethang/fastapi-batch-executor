@@ -13,3 +13,4 @@ pytest
 pytest-asyncio
 pytest-cov
 asgi-lifespan
+redis

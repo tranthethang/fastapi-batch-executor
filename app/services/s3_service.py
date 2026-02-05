@@ -5,6 +5,8 @@ This module provides the S3Service class which handles file uploads, downloads,
 and integrates with the BaseService hook system using asynchronous boto3.
 """
 
+from typing import Any, cast
+
 import aioboto3
 from botocore.config import Config as BotoConfig
 
@@ -53,14 +55,17 @@ class S3Service(BaseService):
         self, content: str, s3_key: str, content_type: str = "text/plain"
     ) -> str:
         """Internal method to upload file to S3."""
-        async with self.session.client(
-            "s3",
-            region_name=self.config.region,
-            aws_access_key_id=self.config.access_key_id,
-            aws_secret_access_key=self.config.secret_access_key,
-            endpoint_url=self.config.endpoint_url,
-            config=BotoConfig(
-                signature_version="s3v4", s3={"addressing_style": "path"}
+        async with cast(
+            Any,
+            self.session.client(
+                "s3",
+                region_name=self.config.region,
+                aws_access_key_id=self.config.access_key_id,
+                aws_secret_access_key=self.config.secret_access_key,
+                endpoint_url=self.config.endpoint_url,
+                config=BotoConfig(
+                    signature_version="s3v4", s3={"addressing_style": "path"}
+                ),
             ),
         ) as s3:
             try:
@@ -89,12 +94,15 @@ class S3Service(BaseService):
 
     async def _get_file(self, s3_key: str) -> str:
         """Internal method to download file from S3."""
-        async with self.session.client(
-            "s3",
-            region_name=self.config.region,
-            aws_access_key_id=self.config.access_key_id,
-            aws_secret_access_key=self.config.secret_access_key,
-            endpoint_url=self.config.endpoint_url,
+        async with cast(
+            Any,
+            self.session.client(
+                "s3",
+                region_name=self.config.region,
+                aws_access_key_id=self.config.access_key_id,
+                aws_secret_access_key=self.config.secret_access_key,
+                endpoint_url=self.config.endpoint_url,
+            ),
         ) as s3:
             try:
                 response = await s3.get_object(
@@ -113,14 +121,17 @@ class S3Service(BaseService):
         Returns:
             bool: True if accessible, False otherwise.
         """
-        async with self.session.client(
-            "s3",
-            region_name=self.config.region,
-            aws_access_key_id=self.config.access_key_id,
-            aws_secret_access_key=self.config.secret_access_key,
-            endpoint_url=self.config.endpoint_url,
-            config=BotoConfig(
-                signature_version="s3v4", s3={"addressing_style": "path"}
+        async with cast(
+            Any,
+            self.session.client(
+                "s3",
+                region_name=self.config.region,
+                aws_access_key_id=self.config.access_key_id,
+                aws_secret_access_key=self.config.secret_access_key,
+                endpoint_url=self.config.endpoint_url,
+                config=BotoConfig(
+                    signature_version="s3v4", s3={"addressing_style": "path"}
+                ),
             ),
         ) as s3:
             try:

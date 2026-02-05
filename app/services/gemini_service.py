@@ -6,7 +6,7 @@ manages concurrency, and integrates with the BaseService hook system.
 """
 
 import asyncio
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 import google.generativeai as genai
 
@@ -43,7 +43,7 @@ class GeminiService(BaseService):
         self,
         prompt: str,
         system_instruction: Optional[str] = None,
-        generation_config: Optional[Dict[str, Any]] = None,
+        generation_config: Optional[Any] = None,
         parts: Optional[List[Any]] = None,
     ) -> str:
         """
@@ -71,7 +71,7 @@ class GeminiService(BaseService):
         self,
         prompt: str,
         system_instruction: Optional[str] = None,
-        generation_config: Optional[Dict[str, Any]] = None,
+        generation_config: Optional[Any] = None,
         parts: Optional[List[Any]] = None,
     ) -> str:
         """Internal method to call Gemini API."""
@@ -95,7 +95,7 @@ class GeminiService(BaseService):
                 response = await loop.run_in_executor(
                     None,
                     lambda: model.generate_content(
-                        content_parts, generation_config=generation_config
+                        content_parts, generation_config=cast(Any, generation_config)
                     ),
                 )
 
