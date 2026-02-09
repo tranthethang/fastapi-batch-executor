@@ -1,0 +1,35 @@
+{
+    // Path to the python executable in your virtual environment
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+
+    // Help Pylance find the libraries
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/.venv/lib/python3.10/site-packages"
+    ],
+
+    // Render whitespace to easily spot indent issues
+    "editor.renderWhitespace": "boundary",
+
+    // Show vertical rulers at common character limits (e.g., 80 or 120 chars)
+    "editor.rulers": [80, 120],
+
+    // Enable bracket pair colorization (native and very fast)
+    "editor.bracketPairColorization.enabled": true,
+    "editor.guides.bracketPairs": "active",
+
+    // Smooth cursor movement for a more modern feel
+    "editor.cursorBlinking": "expand",
+    "editor.cursorSmoothCaretAnimation": "on",
+
+    // Hide unnecessary folders to speed up search (node_modules, vendor, venv)
+    "files.exclude": {
+        "**/node_modules": true,
+        "**/vendor": true,
+        "**/.git": true,
+        "**/__pycache__": true
+    },
+
+    // Ensure files end with a new line (standard practice)
+    "files.insertFinalNewline": true,
+    "files.trimTrailingWhitespace": true,
+}

@@ -1,0 +1,17 @@
+{
+  "project_id": "python-automation-roadmap-async",
+  "mode": "async",
+  "global_files": [
+    {
+      "uri": "https://generativelanguage.googleapis.com/v1beta/files/3aoi3kwpwv6n",
+      "mime_type": "text/markdown"
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "task-001",
+      "prompt": "Hãy lập kế hoạch học tập cho khóa học sau:\n- Tên khóa học: Python thực chiến: Từ Zero đến Automation Specialist\n- Mô tả: Khóa học dành cho người muốn học Python để tự động hóa công việc văn phòng, xử lý Excel và cào dữ liệu web.\n- Đối tượng: Người mới bắt đầu, nhân viên văn phòng, sinh viên kỹ thuật.\n- Công nghệ: Python 3.12, Pandas, Openpyxl, Selenium.\n\nYÊU CẦU CẤU HÌNH:\n- Chia làm 3 giai đoạn (Roadmap).\n- Mỗi giai đoạn có từ 4 đến 5 bài học."
+    }
+  ],
+  "webhook_url": "http://localhost:8080/webhook"
+}
