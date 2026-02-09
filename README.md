@@ -1,6 +1,6 @@
 # FastAPI Batch Executor
 
-A FastAPI-based microservice designed for executing AI tasks, either individually or in batches, using the **Google Gemini API** (`gemini-2.0-flash`). It supports both synchronous and asynchronous execution modes, utilizing **AWS S3** for result consolidation and **Webhooks** for notification.
+A FastAPI-based microservice designed for executing AI tasks, either individually or in batches, using the **Google Gemini API** (`gemini-2.0-flash`). Built on top of the **pyflow-ai-stack**, it supports both synchronous and asynchronous execution modes, utilizing **AWS S3** for result consolidation, **Redis** for state management, and **Webhooks** for notification.
 
 ## Features
 
@@ -8,19 +8,22 @@ A FastAPI-based microservice designed for executing AI tasks, either individuall
 - **Sync/Async Modes**: Get results immediately or process in the background.
 - **S3 Integration**: Automatically consolidates and uploads results to AWS S3.
 - **Webhook Notifications**: Notifies external services upon completion of async tasks.
-- **Concurrency Control**: Built-in semaphore to respect Gemini API rate limits.
-- **Daily Logging**: Timed rotating logs for easy maintenance.
+- **Redis Support**: Integrated for health checks and potential state management.
+- **Built-in Health Checks**: Detailed health monitoring for Gemini, S3, and Redis.
+- **Concurrency Control**: Respects Gemini API rate limits with configurable concurrency.
 
 ## Project Structure
 
 ```text
 app/
-├── api/            # API Route handlers
+├── api/            # API Route handlers (Executor)
+├── core/           # Core configurations and logging
 ├── schemas/        # Pydantic models for request/response
-├── services/       # Logic for Gemini, S3, and Webhooks
-├── config.py       # Configuration and Environment variables
-├── logger.py       # Logging setup
+├── services/       # Business logic (Gemini, S3, Webhook, Executor)
 └── main.py         # Application entry point
+
+bin/                # Operational shell scripts
+tests/              # Comprehensive test suite
 ```
 
 ## Installation
@@ -53,18 +56,18 @@ app/
 ### Starting the Server
 Use the provided shell script:
 ```bash
-./start.sh
+./bin/start.sh
 ```
 Or run directly with uvicorn:
 ```bash
-uvicorn app.main:app --host 0.0.0.0 --port 60062
+python -m app.main
 ```
 
 ### API Endpoints
 
 #### 1. Health Check
-`GET /health`
-Returns the status and current port.
+`GET /health?depends=1`
+Returns the status of the service and its dependencies (Gemini, S3, Redis).
 
 #### 2. Execute Tasks
 `POST /batch/run`
@@ -91,16 +94,24 @@ Returns the status and current port.
 }
 ```
 
-### Formatting
-Run the formatting script to maintain code style:
+## Operations
+
+### Testing
+Run the test suite using the provided script:
 ```bash
-./format.sh
+./bin/test.sh
+```
+
+### Formatting
+Maintain code style with:
+```bash
+./bin/format.sh
 ```
 
 ### Verification
-Verify the installation and server status:
+Verify service health:
 ```bash
-python verify.py
+./bin/verify.sh
 ```
 
 ## Configuration
@@ -108,13 +119,16 @@ python verify.py
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `GEMINI_API_KEY` | Google Gemini API Key | - |
+| `GEMINI_MODEL` | Gemini Model version | `gemini-2.0-flash` |
 | `AWS_ACCESS_KEY_ID` | AWS Access Key | - |
 | `AWS_SECRET_ACCESS_KEY` | AWS Secret Key | - |
-| `AWS_REGION` | AWS Region for S3 | `ap-southeast-1` |
+| `AWS_REGION` | AWS Region for S3 | `us-east-1` |
 | `S3_BUCKET_NAME` | S3 Bucket name | - |
+| `S3_ENDPOINT_URL` | Optional custom S3 endpoint | - |
+| `REDIS_HOST` | Redis server host | `localhost` |
+| `REDIS_PORT` | Redis server port | `6379` |
 | `CONCURRENCY_LIMIT` | Parallel requests to Gemini | `3` |
 | `APP_PORT` | Application Port | `60062` |
-| `DEBUG` | Enable reload mode | `False` |
 
 ## License
 MIT
