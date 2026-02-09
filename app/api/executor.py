@@ -9,9 +9,9 @@ from typing import Union
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 
 from app.core.logger import logger
-from app.implements.executor_impl import executor_impl
 from app.schemas.executor import (AsyncInitiateResponse, BatchRequest,
                                   ExecuteResponse)
+from app.services import executor_service
 
 # Create an APIRouter instance for organizing routes related to AI execution
 router = APIRouter()
@@ -41,13 +41,13 @@ async def execute_tasks(payload: BatchRequest, background_tasks: BackgroundTasks
     if payload.mode == "sync":
         try:
             # Delegate task processing to the implementation layer
-            results = await executor_impl.process_tasks(payload)
+            results = await executor_service.process_tasks(payload)
 
             # If all tasks in the batch returned an error, treat the whole request as a failure
             if all(r.error for r in results):
                 raise Exception("All tasks failed to execute.")
 
-            return ExecuteResponse(status="success", results=results)
+            return ExecuteResponse(project_id=payload.project_id, results=results)
         except Exception as e:
             # Log the error details and return a structured HTTP exception to the client
             logger.error(f"Sync execution failed: {str(e)}")
@@ -56,7 +56,7 @@ async def execute_tasks(payload: BatchRequest, background_tasks: BackgroundTasks
     # Schedule tasks to run in the background and return a 202-like response
     else:
         # Add the async batch process to FastAPI background tasks
-        background_tasks.add_task(executor_impl.run_async_batch, payload)
+        background_tasks.add_task(executor_service.run_async_batch, payload)
 
         # Return immediate confirmation that the process has been initiated
         return AsyncInitiateResponse(

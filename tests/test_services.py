@@ -2,12 +2,12 @@ import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-
-from app.services.base import BaseService
-from app.services.configs import GeminiConfig, RedisConfig, S3Config
-from app.services.gemini_service import GeminiService
-from app.services.redis_service import RedisService
-from app.services.s3_service import S3Service
+from pyflow_ai_stack.services.base import BaseService
+from pyflow_ai_stack.services.configs import (GeminiConfig, RedisConfig,
+                                              S3Config)
+from pyflow_ai_stack.services.gemini_service import GeminiService
+from pyflow_ai_stack.services.redis_service import RedisService
+from pyflow_ai_stack.services.s3_service import S3Service
 
 # --- BaseService Tests ---
 
@@ -89,7 +89,7 @@ def gemini_config():
 @pytest.mark.asyncio
 async def test_gemini_service_initialization(gemini_config):
     service = GeminiService(gemini_config)
-    assert service.model is not None
+    assert service.client is not None
     assert service.config.api_key == "test_key"
 
 
@@ -97,7 +97,7 @@ async def test_gemini_service_initialization(gemini_config):
 async def test_gemini_service_initialization_no_key():
     config = GeminiConfig(api_key=None)
     service = GeminiService(config)
-    assert service.model is None
+    assert service.client is None
 
 
 @pytest.mark.asyncio
@@ -106,8 +106,10 @@ async def test_gemini_generate_content_success(gemini_config):
     mock_response = MagicMock()
     mock_response.text = "generated text"
 
-    with patch("asyncio.get_event_loop") as mock_loop:
-        mock_loop.return_value.run_in_executor = AsyncMock(return_value=mock_response)
+    with patch.object(
+        service.client.aio.models, "generate_content", new_callable=AsyncMock
+    ) as mock_gen:
+        mock_gen.return_value = mock_response
         result = await service.generate_content("hello")
         assert result == "generated text"
 
@@ -118,8 +120,10 @@ async def test_gemini_generate_content_with_advanced_options(gemini_config):
     mock_response = MagicMock()
     mock_response.text = "advanced result"
 
-    with patch("asyncio.get_event_loop") as mock_loop:
-        mock_loop.return_value.run_in_executor = AsyncMock(return_value=mock_response)
+    with patch.object(
+        service.client.aio.models, "generate_content", new_callable=AsyncMock
+    ) as mock_gen:
+        mock_gen.return_value = mock_response
         result = await service.generate_content(
             "hello",
             system_instruction="You are a helpful assistant",
@@ -134,8 +138,10 @@ async def test_gemini_generate_content_no_text(gemini_config):
     mock_response = MagicMock()
     mock_response.text = None
 
-    with patch("asyncio.get_event_loop") as mock_loop:
-        mock_loop.return_value.run_in_executor = AsyncMock(return_value=mock_response)
+    with patch.object(
+        service.client.aio.models, "generate_content", new_callable=AsyncMock
+    ) as mock_gen:
+        mock_gen.return_value = mock_response
         result = await service.generate_content("hello")
         assert result == ""
 
@@ -143,10 +149,10 @@ async def test_gemini_generate_content_no_text(gemini_config):
 @pytest.mark.asyncio
 async def test_gemini_generate_content_error(gemini_config):
     service = GeminiService(gemini_config)
-    with patch("asyncio.get_event_loop") as mock_loop:
-        mock_loop.return_value.run_in_executor = AsyncMock(
-            side_effect=Exception("API Error")
-        )
+    with patch.object(
+        service.client.aio.models, "generate_content", new_callable=AsyncMock
+    ) as mock_gen:
+        mock_gen.side_effect = Exception("API Error")
         with pytest.raises(Exception) as excinfo:
             await service.generate_content("hello")
         assert "API Error" in str(excinfo.value)
@@ -158,7 +164,7 @@ async def test_gemini_generate_content_no_model():
     service = GeminiService(config)
     with pytest.raises(ValueError) as excinfo:
         await service.generate_content("hello")
-    assert "Gemini model is not initialized" in str(excinfo.value)
+    assert "Gemini client is not initialized" in str(excinfo.value)
 
 
 @pytest.mark.asyncio
@@ -166,18 +172,20 @@ async def test_gemini_ping_success(gemini_config):
     service = GeminiService(gemini_config)
     mock_response = MagicMock()
     mock_response.text = "pong"
-    with patch("asyncio.get_event_loop") as mock_loop:
-        mock_loop.return_value.run_in_executor = AsyncMock(return_value=mock_response)
+    with patch.object(
+        service.client.aio.models, "generate_content", new_callable=AsyncMock
+    ) as mock_gen:
+        mock_gen.return_value = mock_response
         assert await service.ping() is True
 
 
 @pytest.mark.asyncio
 async def test_gemini_ping_failure(gemini_config):
     service = GeminiService(gemini_config)
-    with patch("asyncio.get_event_loop") as mock_loop:
-        mock_loop.return_value.run_in_executor = AsyncMock(
-            side_effect=Exception("Fail")
-        )
+    with patch.object(
+        service.client.aio.models, "generate_content", new_callable=AsyncMock
+    ) as mock_gen:
+        mock_gen.side_effect = Exception("Fail")
         assert await service.ping() is False
 
 

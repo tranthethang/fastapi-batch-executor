@@ -18,7 +18,6 @@ app/
 ├── api/            # API Route handlers
 ├── schemas/        # Pydantic models for request/response
 ├── services/       # Logic for Gemini, S3, and Webhooks
-├── utils/          # Helper functions
 ├── config.py       # Configuration and Environment variables
 ├── logger.py       # Logging setup
 └── main.py         # Application entry point
