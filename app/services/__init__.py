@@ -5,6 +5,7 @@ from pyflow_ai_stack.services.s3_service import S3Service
 
 from app.core.config import settings
 
+from .executor_service import executor_service
 from .webhook_service import webhook_service
 
 # Initialize singleton instances
@@ -23,5 +24,6 @@ __all__ = [
     "s3_service",
     "redis_service",
     "webhook_service",
+    "executor_service",
     "health_service",
 ]
