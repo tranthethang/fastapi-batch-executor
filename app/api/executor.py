@@ -47,7 +47,7 @@ async def execute_tasks(payload: BatchRequest, background_tasks: BackgroundTasks
             if all(r.error for r in results):
                 raise Exception("All tasks failed to execute.")
 
-            return ExecuteResponse(status="success", results=results)
+            return ExecuteResponse(project_id=payload.project_id, results=results)
         except Exception as e:
             # Log the error details and return a structured HTTP exception to the client
             logger.error(f"Sync execution failed: {str(e)}")

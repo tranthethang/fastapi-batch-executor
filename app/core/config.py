@@ -23,11 +23,6 @@ class Settings(BaseSettings):
         extra="ignore",  # Ignore extra environment variables not defined here
     )
 
-    # Basic Application Metadata
-    APP_NAME: str = "fastapi-boilerplate"
-    DEBUG: bool = False
-    APP_PORT: int = 80
-
 
 # Global singleton instance providing access to all application settings
 settings = Settings()

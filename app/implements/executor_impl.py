@@ -11,8 +11,8 @@ import time
 from datetime import datetime, timezone
 
 from app.core.logger import logger
-from app.core.services import gemini_service, s3_service, webhook_service
 from app.schemas.executor import BatchRequest, TaskResult
+from app.services import gemini_service, s3_service, webhook_service
 
 
 class ExecutorImpl:
@@ -59,10 +59,14 @@ class ExecutorImpl:
             if isinstance(res, BaseException):
                 # If the coroutine raised an exception, record the error
                 logger.error(f"Task {task_id} failed: {str(res)}")
-                results.append(TaskResult(task_id=task_id, error=str(res)))
+                results.append(
+                    TaskResult(task_id=task_id, status="error", error=str(res))
+                )
             else:
                 # If successful, record the generated content
-                results.append(TaskResult(task_id=task_id, content=res))
+                results.append(
+                    TaskResult(task_id=task_id, status="success", result=res)
+                )
         return results
 
     async def run_async_batch(self, payload: BatchRequest):
@@ -80,7 +84,7 @@ class ExecutorImpl:
 
         # 2. Consolidate successful results into a single markdown string
         # Filters out failed tasks to ensure only valid content is saved
-        merged_content = "\n\n".join([r.content for r in results if r.content])
+        merged_content = "\n\n".join([r.result for r in results if r.result])
 
         # 3. Generate a unique S3 storage key
         # Path structure: {PREFIX}/yyyy/mm/dd/{project_id}_{timestamp}_{random_4}.md
@@ -111,7 +115,7 @@ class ExecutorImpl:
                 "status": "completed",
                 "s3_uri": s3_uri,
                 "results_summary": [
-                    {"task_id": r.task_id, "success": r.content is not None}
+                    {"task_id": r.task_id, "success": r.result is not None}
                     for r in results
                 ],
             }

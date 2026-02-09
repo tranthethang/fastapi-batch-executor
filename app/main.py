@@ -11,7 +11,7 @@ from pyflow_ai_stack.schemas.models import HealthResponse
 from app.api.executor import router as executor_router
 from app.core.config import settings
 from app.core.logger import logger
-from app.core.services import health_service
+from app.services import health_service
 
 # Initialize the FastAPI application
 # Sets metadata like title, description, and version for API documentation (Swagger/Redoc)
