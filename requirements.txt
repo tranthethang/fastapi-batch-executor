@@ -1,11 +1,9 @@
 fastapi
 uvicorn[standard]
-google-generativeai
-aioboto3
+pyflow-ai-stack
 httpx
 python-multipart
 python-dotenv
-boto3
 pydantic-settings
 black
 isort
@@ -13,4 +11,3 @@ pytest
 pytest-asyncio
 pytest-cov
 asgi-lifespan
-redis

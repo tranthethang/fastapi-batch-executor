@@ -6,10 +6,12 @@ registers API routers, and defines the application's startup behavior.
 
 import uvicorn
 from fastapi import FastAPI
+from pyflow_ai_stack.schemas.models import HealthResponse
 
 from app.api.executor import router as executor_router
-from app.core.config import Config
+from app.core.config import settings
 from app.core.logger import logger
+from app.core.services import health_service
 
 # Initialize the FastAPI application
 # Sets metadata like title, description, and version for API documentation (Swagger/Redoc)
@@ -24,29 +26,28 @@ app = FastAPI(
 app.include_router(executor_router, prefix="/batch", tags=["Batch Executor"])
 
 
-@app.get("/health")
-async def health_check():
+@app.get("/health", response_model=HealthResponse, response_model_exclude_none=True)
+async def health_check(depends: int = 0):
     """
     Health check endpoint to verify that the service is running and healthy.
+
+    Args:
+        depends (int): Whether to check dependencies (1) or not (0).
 
     Returns:
         dict: A dictionary containing the service status, project name, and active port.
     """
-    return {
-        "status": "healthy",
-        "project": "fastapi-batch-executor",
-        "port": Config.APP_PORT,
-    }
+    return await health_service.check_health(depends=depends)
 
 
 if __name__ == "__main__":
     # Log the application startup information, including the port it will listen on
-    logger.info(f"Starting fastapi-batch-executor on port: {Config.APP_PORT}")
+    logger.info(f"Starting fastapi-batch-executor on port: {settings.APP_PORT}")
 
     # Start the Uvicorn server to host the FastAPI application
     # host: "0.0.0.0" allows external access to the container/machine
     # port: Configured port from environment variables or default settings
     # reload: Enabled in debug mode for automatic code refresh during development
     uvicorn.run(
-        "app.main:app", host="0.0.0.0", port=Config.APP_PORT, reload=Config.DEBUG
+        "app.main:app", host="0.0.0.0", port=settings.APP_PORT, reload=settings.DEBUG
     )

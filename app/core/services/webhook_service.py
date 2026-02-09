@@ -1,7 +1,7 @@
 import httpx
+from pyflow_ai_stack.services.base import BaseService
 
 from app.core.logger import logger
-from app.services.base import BaseService
 
 
 class WebhookService(BaseService):

@@ -11,10 +11,8 @@ import time
 from datetime import datetime, timezone
 
 from app.core.logger import logger
+from app.core.services import gemini_service, s3_service, webhook_service
 from app.schemas.executor import BatchRequest, TaskResult
-from app.services.gemini_service import gemini_service
-from app.services.s3_service import s3_service
-from app.services.webhook_service import webhook_service
 
 
 class ExecutorImpl:
