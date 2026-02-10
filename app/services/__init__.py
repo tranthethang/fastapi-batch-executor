@@ -5,10 +5,7 @@ from pyflow_ai_stack.services.s3_service import S3Service
 
 from app.core.config import settings
 
-from .executor_service import executor_service
-from .webhook_service import webhook_service
-
-# Initialize singleton instances
+# Initialize core singleton instances first
 gemini_service = GeminiService(settings.gemini)
 s3_service = S3Service(settings.s3)
 redis_service = RedisService(settings.redis)
@@ -18,6 +15,10 @@ health_service = HealthService(
     s3_service=s3_service,
     app_name="fastapi-batch-executor",
 )
+
+# Import and initialize other services that may depend on the core services above
+from .executor_service import executor_service
+from .webhook_service import webhook_service
 
 __all__ = [
     "gemini_service",

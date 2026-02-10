@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     Extends BaseSettings from pyflow-ai-stack with application-specific metadata.
     """
 
+    APP_PORT: int = 80
+    DEBUG: bool = False
+
     # Configuration for the Pydantic Settings loader
     model_config = SettingsConfigDict(
         env_file=".env",  # Path to the environment file
