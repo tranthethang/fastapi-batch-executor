@@ -1,14 +1,18 @@
+import sys
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from app.implements.executor_impl import ExecutorImpl
+import app.services.executor_service
+
+executor_module = sys.modules["app.services.executor_service"]
 from app.schemas.executor import BatchRequest, FileItem, TaskItem, TaskResult
+from app.services.executor_service import ExecutorService
 
 
 @pytest.fixture
 def executor():
-    return ExecutorImpl()
+    return ExecutorService()
 
 
 @pytest.fixture
@@ -28,22 +32,22 @@ def batch_request():
 
 @pytest.mark.asyncio
 async def test_process_tasks_success(executor, batch_request):
-    with patch("app.implements.executor_impl.gemini_service") as mock_gemini:
+    with patch.object(executor_module, "gemini_service") as mock_gemini:
         mock_gemini.generate_content = AsyncMock(side_effect=["result1", "result2"])
 
         results = await executor.process_tasks(batch_request)
 
         assert len(results) == 2
         assert results[0].task_id == "task1"
-        assert results[0].content == "result1"
+        assert results[0].result == "result1"
         assert results[1].task_id == "task2"
-        assert results[1].content == "result2"
+        assert results[1].result == "result2"
         assert mock_gemini.generate_content.call_count == 2
 
 
 @pytest.mark.asyncio
 async def test_process_tasks_partial_failure(executor, batch_request):
-    with patch("app.implements.executor_impl.gemini_service") as mock_gemini:
+    with patch.object(executor_module, "gemini_service") as mock_gemini:
         mock_gemini.generate_content = AsyncMock(
             side_effect=["result1", Exception("Gemini error")]
         )
@@ -52,7 +56,7 @@ async def test_process_tasks_partial_failure(executor, batch_request):
 
         assert len(results) == 2
         assert results[0].task_id == "task1"
-        assert results[0].content == "result1"
+        assert results[0].result == "result1"
         assert results[1].task_id == "task2"
         assert results[1].error == "Gemini error"
 
@@ -60,16 +64,16 @@ async def test_process_tasks_partial_failure(executor, batch_request):
 @pytest.mark.asyncio
 async def test_run_async_batch_success(executor, batch_request):
     batch_request.mode = "async"
-    with patch("app.implements.executor_impl.gemini_service") as mock_gemini, patch(
-        "app.implements.executor_impl.s3_service"
-    ) as mock_s3, patch(
-        "app.implements.executor_impl.webhook_service"
-    ) as mock_webhook, patch(
-        "app.implements.executor_impl.datetime"
-    ) as mock_datetime, patch(
-        "app.implements.executor_impl.time"
-    ) as mock_time, patch(
-        "app.implements.executor_impl.secrets"
+    with patch.object(executor_module, "gemini_service") as mock_gemini, patch.object(
+        executor_module, "s3_service"
+    ) as mock_s3, patch.object(
+        executor_module, "webhook_service"
+    ) as mock_webhook, patch.object(
+        executor_module, "datetime"
+    ) as mock_datetime, patch.object(
+        executor_module, "time"
+    ) as mock_time, patch.object(
+        executor_module, "secrets"
     ) as mock_secrets:
 
         mock_gemini.generate_content = AsyncMock(side_effect=["result1", "result2"])
@@ -100,9 +104,9 @@ async def test_run_async_batch_success(executor, batch_request):
 @pytest.mark.asyncio
 async def test_run_async_batch_s3_failure(executor, batch_request):
     batch_request.mode = "async"
-    with patch("app.implements.executor_impl.gemini_service") as mock_gemini, patch(
-        "app.implements.executor_impl.s3_service"
-    ) as mock_s3, patch("app.implements.executor_impl.webhook_service") as mock_webhook:
+    with patch.object(executor_module, "gemini_service") as mock_gemini, patch.object(
+        executor_module, "s3_service"
+    ) as mock_s3, patch.object(executor_module, "webhook_service") as mock_webhook:
 
         mock_gemini.generate_content = AsyncMock(side_effect=["result1", "result2"])
         mock_s3.upload_file = AsyncMock(side_effect=Exception("S3 error"))
@@ -120,9 +124,9 @@ async def test_run_async_batch_no_webhook(executor, batch_request):
     batch_request.mode = "async"
     batch_request.webhook_url = None
     # Schema validation normally prevents this but let's test the logic
-    with patch("app.implements.executor_impl.gemini_service") as mock_gemini, patch(
-        "app.implements.executor_impl.s3_service"
-    ) as mock_s3, patch("app.implements.executor_impl.webhook_service") as mock_webhook:
+    with patch.object(executor_module, "gemini_service") as mock_gemini, patch.object(
+        executor_module, "s3_service"
+    ) as mock_s3, patch.object(executor_module, "webhook_service") as mock_webhook:
 
         mock_gemini.generate_content = AsyncMock(side_effect=["result1", "result2"])
         mock_s3.upload_file = AsyncMock(return_value="s3://bucket/key.md")

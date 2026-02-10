@@ -29,22 +29,25 @@ def async_payload():
 
 
 def test_execute_tasks_sync_success(sync_payload):
-    with patch("app.api.executor.executor_impl") as mock_executor:
+    with patch("app.api.executor.executor_service") as mock_executor:
         mock_executor.process_tasks = AsyncMock(
-            return_value=[TaskResult(task_id="task1", content="result1")]
+            return_value=[
+                TaskResult(task_id="task1", status="success", result="result1")
+            ]
         )
 
         response = client.post("/batch/run", json=sync_payload)
 
         assert response.status_code == 200
-        assert response.json()["status"] == "success"
-        assert response.json()["results"][0]["content"] == "result1"
+        assert response.json()["results"][0]["result"] == "result1"
 
 
 def test_execute_tasks_sync_all_failed(sync_payload):
-    with patch("app.api.executor.executor_impl") as mock_executor:
+    with patch("app.api.executor.executor_service") as mock_executor:
         mock_executor.process_tasks = AsyncMock(
-            return_value=[TaskResult(task_id="task1", error="Some error")]
+            return_value=[
+                TaskResult(task_id="task1", status="error", error="Some error")
+            ]
         )
 
         response = client.post("/batch/run", json=sync_payload)
@@ -54,7 +57,7 @@ def test_execute_tasks_sync_all_failed(sync_payload):
 
 
 def test_execute_tasks_sync_exception(sync_payload):
-    with patch("app.api.executor.executor_impl") as mock_executor:
+    with patch("app.api.executor.executor_service") as mock_executor:
         mock_executor.process_tasks = AsyncMock(
             side_effect=Exception("Unexpected error")
         )
@@ -66,7 +69,7 @@ def test_execute_tasks_sync_exception(sync_payload):
 
 
 def test_execute_tasks_async_success(async_payload):
-    with patch("app.api.executor.executor_impl") as mock_executor:
+    with patch("app.api.executor.executor_service") as mock_executor:
         # We don't need to mock run_async_batch return as it's a background task
         response = client.post("/batch/run", json=async_payload)
 
