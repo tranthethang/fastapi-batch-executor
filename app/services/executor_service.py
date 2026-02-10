@@ -7,7 +7,9 @@ from typing import List
 
 from app.core.logger import logger
 from app.schemas.executor import BatchRequest, TaskResult
-from app.services import gemini_service, s3_service, webhook_service
+
+from . import gemini_service, s3_service
+from .webhook_service import webhook_service
 
 
 class ExecutorService:
@@ -62,7 +64,10 @@ class ExecutorService:
                     for r in results
                 ],
             }
-            await webhook_service.notify(payload.webhook_url, webhook_data)
+            try:
+                await webhook_service.notify(payload.webhook_url, webhook_data)
+            except Exception as e:
+                logger.error(f"Failed to send webhook notification: {str(e)}")
 
     def _generate_s3_key(self, project_id: str, prefix: str) -> str:
         now = datetime.now(timezone.utc)

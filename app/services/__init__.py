@@ -16,8 +16,8 @@ health_service = HealthService(
     app_name="fastapi-batch-executor",
 )
 
-# Import and initialize other services that may depend on the core services above
 from .executor_service import executor_service
+# Import and initialize other services that may depend on the core services above
 from .webhook_service import webhook_service
 
 __all__ = [
