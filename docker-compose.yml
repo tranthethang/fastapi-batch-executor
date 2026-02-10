@@ -1,0 +1,29 @@
+services:
+  fastapi:
+    build:
+      context: .
+      args:
+        # Pass host user/group IDs to the build process for permission sync
+        WWWUSER: ${WWWUSER:-1000}
+        WWWGROUP: ${WWWGROUP:-1000}
+    # Load all variables from .env into the container's environment
+    env_file:
+      - .env
+    ports:
+      # Map host port from .env to container port 80
+      - "${APP_PORT:-80}:80"
+    volumes:
+      # Mount entire project for hot-reload
+      - .:/app
+    environment:
+      # Force Python to flush logs immediately and skip .pyc files
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+    # Run process as the 'agent' user created in Dockerfile
+    user: "${WWWUSER}:${WWWGROUP}"
+    networks:
+        - dev_tools
+
+networks:
+    dev_tools:
+        external: true
