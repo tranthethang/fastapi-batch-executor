@@ -1,5 +1,5 @@
 # Stage 1: Build dependencies
-FROM python:3.10-alpine as builder
+FROM python:3.10-alpine AS builder
 
 # Install build tools for C-based Python packages (if any)
 RUN apk add --no-cache gcc musl-dev libffi-dev
