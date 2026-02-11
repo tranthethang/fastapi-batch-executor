@@ -39,7 +39,7 @@ jobs:
       run: black --check .
 
     - name: Lint with isort
-      run: isort --check-only .
+      run: isort --check-only --profile black .
 
     - name: Run tests
       run: |
