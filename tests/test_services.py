@@ -3,8 +3,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from pyflow_ai_stack.services.base import BaseService
-from pyflow_ai_stack.services.configs import (GeminiConfig, RedisConfig,
-                                              S3Config)
+from pyflow_ai_stack.services.configs import GeminiConfig, RedisConfig, S3Config
 from pyflow_ai_stack.services.gemini_service import GeminiService
 from pyflow_ai_stack.services.redis_service import RedisService
 from pyflow_ai_stack.services.s3_service import S3Service
