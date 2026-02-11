@@ -9,8 +9,7 @@ from typing import Union
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 
 from app.core.logger import logger
-from app.schemas.executor import (AsyncInitiateResponse, BatchRequest,
-                                  ExecuteResponse)
+from app.schemas.executor import AsyncInitiateResponse, BatchRequest, ExecuteResponse
 from app.services import executor_service
 
 # Create an APIRouter instance for organizing routes related to AI execution
