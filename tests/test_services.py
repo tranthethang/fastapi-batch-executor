@@ -169,17 +169,18 @@ async def test_gemini_generate_content_no_model():
 @pytest.mark.asyncio
 async def test_gemini_ping_success(gemini_config):
     service = GeminiService(gemini_config)
-    # Patch the method directly on the instance's class to be sure it's caught
-    with patch.object(GeminiService, "generate_content", new_callable=AsyncMock) as mock_gen:
-        mock_gen.return_value = "pong"
+    # Ping calls client.aio.models.get instead of generate_content
+    with patch.object(service.client.aio.models, "get", new_callable=AsyncMock) as mock_get:
+        mock_get.return_value = AsyncMock()
         assert await service.ping() is True
 
 
 @pytest.mark.asyncio
 async def test_gemini_ping_failure(gemini_config):
     service = GeminiService(gemini_config)
-    with patch.object(GeminiService, "generate_content", new_callable=AsyncMock) as mock_gen:
-        mock_gen.side_effect = Exception("Fail")
+    # Ping calls client.aio.models.get instead of generate_content
+    with patch.object(service.client.aio.models, "get", new_callable=AsyncMock) as mock_get:
+        mock_get.side_effect = Exception("Fail")
         assert await service.ping() is False
 
 
