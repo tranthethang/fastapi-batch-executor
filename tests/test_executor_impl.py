@@ -64,16 +64,17 @@ async def test_process_tasks_partial_failure(executor, batch_request):
 @pytest.mark.asyncio
 async def test_run_async_batch_success(executor, batch_request):
     batch_request.mode = "async"
-    with patch.object(executor_module, "gemini_service") as mock_gemini, patch.object(
-        executor_module, "s3_service"
-    ) as mock_s3, patch.object(
-        executor_module, "webhook_service"
-    ) as mock_webhook, patch.object(
-        executor_module, "datetime"
-    ) as mock_datetime:
+    with (
+        patch.object(executor_module, "gemini_service") as mock_gemini,
+        patch.object(executor_module, "s3_service") as mock_s3,
+        patch.object(executor_module, "webhook_service") as mock_webhook,
+        patch.object(executor_module, "datetime") as mock_datetime,
+    ):
 
         mock_gemini.generate_content = AsyncMock(side_effect=["result1", "result2"])
-        mock_s3.upload_file = AsyncMock(side_effect=["s3://bucket/task1.txt", "s3://bucket/task2.txt"])
+        mock_s3.upload_file = AsyncMock(
+            side_effect=["s3://bucket/task1.txt", "s3://bucket/task2.txt"]
+        )
         mock_webhook.notify = AsyncMock(return_value=True)
 
         # Mock datetime for predictable S3 key
@@ -96,9 +97,11 @@ async def test_run_async_batch_success(executor, batch_request):
 @pytest.mark.asyncio
 async def test_run_async_batch_s3_failure(executor, batch_request):
     batch_request.mode = "async"
-    with patch.object(executor_module, "gemini_service") as mock_gemini, patch.object(
-        executor_module, "s3_service"
-    ) as mock_s3, patch.object(executor_module, "webhook_service") as mock_webhook:
+    with (
+        patch.object(executor_module, "gemini_service") as mock_gemini,
+        patch.object(executor_module, "s3_service") as mock_s3,
+        patch.object(executor_module, "webhook_service") as mock_webhook,
+    ):
 
         mock_gemini.generate_content = AsyncMock(side_effect=["result1", "result2"])
         mock_s3.upload_file = AsyncMock(side_effect=Exception("S3 error"))
@@ -115,9 +118,11 @@ async def test_run_async_batch_s3_failure(executor, batch_request):
 async def test_run_async_batch_no_webhook(executor, batch_request):
     batch_request.mode = "async"
     batch_request.webhook_url = None
-    with patch.object(executor_module, "gemini_service") as mock_gemini, patch.object(
-        executor_module, "s3_service"
-    ) as mock_s3, patch.object(executor_module, "webhook_service") as mock_webhook:
+    with (
+        patch.object(executor_module, "gemini_service") as mock_gemini,
+        patch.object(executor_module, "s3_service") as mock_s3,
+        patch.object(executor_module, "webhook_service") as mock_webhook,
+    ):
 
         mock_gemini.generate_content = AsyncMock(side_effect=["result1", "result2"])
         mock_s3.upload_file = AsyncMock(return_value="s3://bucket/key.txt")

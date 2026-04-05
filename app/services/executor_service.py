@@ -20,7 +20,7 @@ DEFAULT_CONTENT_TYPE = "text/plain"
 
 class ExecutorService:
     """Service to handle the execution of AI tasks in batches.
-    
+
     This service orchestrates the process of calling Gemini for multiple tasks,
     handling the results, uploading them to S3, and notifying via webhooks.
     """
@@ -60,7 +60,7 @@ class ExecutorService:
 
     async def run_async_batch(self, payload: BatchRequest) -> None:
         """Run batch processing asynchronously and manage output delivery.
-        
+
         This method handles the high-level flow of an async batch: processing,
         uploading results to S3, and sending a webhook notification.
 
@@ -105,7 +105,10 @@ class ExecutorService:
         return task_uris
 
     async def _notify_completion(
-        self, payload: BatchRequest, results: List[TaskResult], task_uris: Dict[str, str]
+        self,
+        payload: BatchRequest,
+        results: List[TaskResult],
+        task_uris: Dict[str, str],
     ) -> None:
         """Send a webhook notification with the batch results summary.
 

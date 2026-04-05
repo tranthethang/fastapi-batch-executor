@@ -5,6 +5,7 @@ registers API routers, and defines the application's startup behavior.
 """
 
 import os
+
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware

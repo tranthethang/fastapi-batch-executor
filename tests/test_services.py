@@ -170,7 +170,9 @@ async def test_gemini_generate_content_no_model():
 async def test_gemini_ping_success(gemini_config):
     service = GeminiService(gemini_config)
     # Ping calls client.aio.models.get instead of generate_content
-    with patch.object(service.client.aio.models, "get", new_callable=AsyncMock) as mock_get:
+    with patch.object(
+        service.client.aio.models, "get", new_callable=AsyncMock
+    ) as mock_get:
         mock_get.return_value = AsyncMock()
         assert await service.ping() is True
 
@@ -179,7 +181,9 @@ async def test_gemini_ping_success(gemini_config):
 async def test_gemini_ping_failure(gemini_config):
     service = GeminiService(gemini_config)
     # Ping calls client.aio.models.get instead of generate_content
-    with patch.object(service.client.aio.models, "get", new_callable=AsyncMock) as mock_get:
+    with patch.object(
+        service.client.aio.models, "get", new_callable=AsyncMock
+    ) as mock_get:
         mock_get.side_effect = Exception("Fail")
         assert await service.ping() is False
 
