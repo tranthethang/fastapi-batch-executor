@@ -22,6 +22,11 @@ def setup_logger(logger_instance: logging.Logger):
 
     logger_instance.setLevel(logging.INFO)
 
+    # pyflow_ai_stack attaches a NullHandler so libraries stay quiet; that makes
+    # ``if not logger_instance.handlers`` false forever, so no file/console sinks
+    # were added and all INFO logs disappeared (no files under services/batch-executor/logs).
+    logger_instance.handlers.clear()
+
     if not logger_instance.handlers:
         formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 

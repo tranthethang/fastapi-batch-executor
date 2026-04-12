@@ -1,10 +1,8 @@
 import asyncio
-import secrets
-import string
-import time
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
+from app.core.config import settings
 from app.core.logger import logger
 from app.schemas.executor import BatchRequest, TaskResult
 
@@ -35,10 +33,11 @@ class ExecutorService:
             A list of TaskResult objects containing the execution results or errors.
         """
         coros = []
+        global_files = payload.global_files or []
         for t in payload.tasks:
             parts = [
                 {"file_data": {"file_uri": f.uri, "mime_type": f.mime_type}}
-                for f in payload.global_files
+                for f in global_files
             ]
             coros.append(gemini_service.generate_content(t.prompt, parts=parts))
 
@@ -70,6 +69,14 @@ class ExecutorService:
         logger.info(f"Starting async batch for project: {payload.project_id}")
         results = await self.process_tasks(payload)
 
+        s3_cfg = settings.s3
+        logger.info(
+            "S3 target for batch upload: bucket=%s endpoint=%s path_style=%s",
+            s3_cfg.bucket_name,
+            s3_cfg.endpoint_url or "(default-aws)",
+            s3_cfg.with_path_style,
+        )
+
         # Upload results individually per task
         task_uris = await self._upload_results_to_s3(payload, results)
 
@@ -90,18 +97,44 @@ class ExecutorService:
         """
         task_uris: Dict[str, str] = {}
         for r in results:
-            if r.status == STATUS_SUCCESS and r.result:
-                s3_key = self._generate_task_s3_key(
-                    payload.project_id, r.task_id, payload.s3_path_prefix
+            if r.status != STATUS_SUCCESS:
+                continue
+            if not r.result:
+                logger.warning(
+                    "Task %s succeeded but result text is empty; skipping S3 upload",
+                    r.task_id,
                 )
-                try:
-                    s3_uri = await s3_service.upload_file(
-                        r.result, s3_key, content_type=DEFAULT_CONTENT_TYPE
-                    )
-                    task_uris[r.task_id] = s3_uri
-                    logger.debug(f"Task {r.task_id} uploaded to: {s3_uri}")
-                except Exception as e:
-                    logger.error(f"Task {r.task_id} S3 Upload Failed: {str(e)}")
+                continue
+            s3_key = self._generate_task_s3_key(
+                payload.project_id, r.task_id, payload.s3_path_prefix
+            )
+            logger.info(
+                "S3 upload start: project_id=%s task_id=%s key=%s",
+                payload.project_id,
+                r.task_id,
+                s3_key,
+            )
+            try:
+                s3_uri = await s3_service.upload_file(
+                    r.result, s3_key, content_type=DEFAULT_CONTENT_TYPE
+                )
+                task_uris[r.task_id] = s3_uri
+                logger.info(
+                    "S3 upload ok: project_id=%s task_id=%s uri=%s",
+                    payload.project_id,
+                    r.task_id,
+                    s3_uri,
+                )
+            except Exception as e:
+                logger.error(f"Task {r.task_id} S3 Upload Failed: {str(e)}")
+        if not task_uris:
+            ok_count = sum(1 for x in results if x.status == STATUS_SUCCESS)
+            logger.error(
+                "task_uris empty after upload: project_id=%s successful_tasks=%d "
+                "(check MinIO/S3 credentials, bucket, endpoint, or empty Gemini output)",
+                payload.project_id,
+                ok_count,
+            )
         return task_uris
 
     async def _notify_completion(
@@ -117,14 +150,22 @@ class ExecutorService:
             results: The results summary to include.
             task_uris: The mapping of task IDs to S3 storage URIs.
         """
+        summary: List[Dict[str, Any]] = []
+        for r in results:
+            row: Dict[str, Any] = {
+                "task_id": r.task_id,
+                "success": r.status == STATUS_SUCCESS,
+            }
+            err_detail = getattr(r, "error", None)
+            if err_detail:
+                row["error"] = str(err_detail)
+            summary.append(row)
+
         webhook_data = {
             "project_id": payload.project_id,
             "status": STATUS_COMPLETED,
             "task_uris": task_uris,
-            "results_summary": [
-                {"task_id": r.task_id, "success": r.status == STATUS_SUCCESS}
-                for r in results
-            ],
+            "results_summary": summary,
             "completed_at": datetime.now(timezone.utc).isoformat(),
         }
         try:
@@ -151,24 +192,6 @@ class ExecutorService:
             c for c in task_id if c.isalnum() or c in ("-", "_")
         ).lower()
         return f"{prefix}{date_path}/{project_id}/{safe_task_id}.txt"
-
-    def _generate_s3_key(self, project_id: str, prefix: str) -> str:
-        """Legacy method for generating a merged S3 key.
-
-        Args:
-            project_id: The project identifier.
-            prefix: The S3 path prefix.
-
-        Returns:
-            A randomly generated S3 key string.
-        """
-        now = datetime.now(timezone.utc)
-        date_path = now.strftime("%Y/%m/%d")
-        timestamp = int(time.time())
-        random_str = "".join(
-            secrets.choice(string.ascii_lowercase + string.digits) for _ in range(4)
-        )
-        return f"{prefix}{date_path}/{project_id}_{timestamp}_{random_str}.md"
 
 
 executor_service = ExecutorService()
