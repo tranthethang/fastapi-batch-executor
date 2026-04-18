@@ -23,6 +23,9 @@ app = FastAPI(
     description="Microservice for handling single and batch AI tasks using Google Gemini and AWS S3",
     version="1.0.0",
     root_path=os.getenv("ROOT_PATH", ""),
+    openapi_url=settings.OPENAPI_JSON_PATH,
+    docs_url=settings.SWAGGER_UI_PATH,
+    redoc_url=settings.REDOC_PATH,
 )
 
 # Configure CORS

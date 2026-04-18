@@ -32,6 +32,20 @@ class Settings(BaseSettings):
         description="Model for batch Gemini calls; set GEMINI_MODEL to match the main app.",
     )
 
+    # Kong uses path /batch with strip_path=false, so the ASGI path must include /batch/... .
+    OPENAPI_JSON_PATH: str = Field(
+        default="/batch/openapi.json",
+        description="OpenAPI JSON path; must match Kong /batch prefix when strip_path is false.",
+    )
+    SWAGGER_UI_PATH: str = Field(
+        default="/batch/docs",
+        description="Swagger UI path under the same /batch prefix as API routes.",
+    )
+    REDOC_PATH: str = Field(
+        default="/batch/redoc",
+        description="ReDoc path under the same /batch prefix as API routes.",
+    )
+
     # Align S3 env names with gemini-pipeline / docker-compose (pyflow expects AWS_* / S3_*_URL).
     AWS_ACCESS_KEY_ID: Optional[str] = Field(
         default="minioadmin",
