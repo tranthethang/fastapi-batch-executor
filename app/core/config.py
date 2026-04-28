@@ -5,7 +5,6 @@ from a .env file or the system environment.
 """
 
 from pathlib import Path
-from typing import Optional
 
 from pydantic import AliasChoices, Field
 from pydantic_settings import SettingsConfigDict
@@ -47,19 +46,19 @@ class Settings(BaseSettings):
     )
 
     # Align S3 env names with gemini-pipeline / docker-compose (pyflow expects AWS_* / S3_*_URL).
-    AWS_ACCESS_KEY_ID: Optional[str] = Field(
+    AWS_ACCESS_KEY_ID: str | None = Field(
         default="minioadmin",
         validation_alias=AliasChoices("AWS_ACCESS_KEY_ID", "S3_ACCESS_KEY"),
     )
-    AWS_SECRET_ACCESS_KEY: Optional[str] = Field(
+    AWS_SECRET_ACCESS_KEY: str | None = Field(
         default="minioadmin123",
         validation_alias=AliasChoices("AWS_SECRET_ACCESS_KEY", "S3_SECRET_KEY"),
     )
-    S3_BUCKET_NAME: Optional[str] = Field(
+    S3_BUCKET_NAME: str | None = Field(
         default="gemini-pipeline",
         validation_alias=AliasChoices("S3_BUCKET_NAME", "S3_BUCKET"),
     )
-    S3_ENDPOINT_URL: Optional[str] = Field(
+    S3_ENDPOINT_URL: str | None = Field(
         default="http://localhost:9000",
         validation_alias=AliasChoices("S3_ENDPOINT_URL", "S3_ENDPOINT"),
     )

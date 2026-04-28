@@ -1,6 +1,6 @@
 import asyncio
 from datetime import datetime, timezone
-from typing import Any, Dict, List
+from typing import Any
 
 from app.core.config import settings
 from app.core.logger import logger
@@ -23,7 +23,7 @@ class ExecutorService:
     handling the results, uploading them to S3, and notifying via webhooks.
     """
 
-    async def process_tasks(self, payload: BatchRequest) -> List[TaskResult]:
+    async def process_tasks(self, payload: BatchRequest) -> list[TaskResult]:
         """Process all tasks in the batch concurrently using Gemini.
 
         Args:
@@ -84,8 +84,8 @@ class ExecutorService:
             await self._notify_completion(payload, results, task_uris)
 
     async def _upload_results_to_s3(
-        self, payload: BatchRequest, results: List[TaskResult]
-    ) -> Dict[str, str]:
+        self, payload: BatchRequest, results: list[TaskResult]
+    ) -> dict[str, str]:
         """Upload successful task results to S3 storage.
 
         Args:
@@ -95,7 +95,7 @@ class ExecutorService:
         Returns:
             A dictionary mapping task IDs to their S3 URIs.
         """
-        task_uris: Dict[str, str] = {}
+        task_uris: dict[str, str] = {}
         for r in results:
             if r.status != STATUS_SUCCESS:
                 continue
@@ -140,8 +140,8 @@ class ExecutorService:
     async def _notify_completion(
         self,
         payload: BatchRequest,
-        results: List[TaskResult],
-        task_uris: Dict[str, str],
+        results: list[TaskResult],
+        task_uris: dict[str, str],
     ) -> None:
         """Send a webhook notification with the batch results summary.
 
@@ -150,9 +150,9 @@ class ExecutorService:
             results: The results summary to include.
             task_uris: The mapping of task IDs to S3 storage URIs.
         """
-        summary: List[Dict[str, Any]] = []
+        summary: list[dict[str, Any]] = []
         for r in results:
-            row: Dict[str, Any] = {
+            row: dict[str, Any] = {
                 "task_id": r.task_id,
                 "success": r.status == STATUS_SUCCESS,
             }

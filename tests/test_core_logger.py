@@ -1,8 +1,6 @@
 import logging
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 # Mock these globally to avoid side effects during module load/setup
 with patch("logging.StreamHandler"), patch("logging.handlers.TimedRotatingFileHandler"):
     from app.core.logger import setup_logger
@@ -17,7 +15,6 @@ def test_setup_logger():
         patch("logging.handlers.TimedRotatingFileHandler") as mock_file_handler,
         patch("logging.StreamHandler") as mock_stream_handler,
     ):
-
         mock_file_handler.return_value = MagicMock(spec=logging.Handler)
         mock_stream_handler.return_value = MagicMock(spec=logging.Handler)
 

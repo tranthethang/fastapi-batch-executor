@@ -3,10 +3,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-import app.services.executor_service
-
 executor_module = sys.modules["app.services.executor_service"]
-from app.schemas.executor import BatchRequest, FileItem, TaskItem, TaskResult
+from app.schemas.executor import BatchRequest, FileItem, TaskItem
 from app.services.executor_service import ExecutorService
 
 
@@ -70,7 +68,6 @@ async def test_run_async_batch_success(executor, batch_request):
         patch.object(executor_module, "webhook_service") as mock_webhook,
         patch.object(executor_module, "datetime") as mock_datetime,
     ):
-
         mock_gemini.generate_content = AsyncMock(side_effect=["result1", "result2"])
         mock_s3.upload_file = AsyncMock(
             side_effect=["s3://bucket/task1.txt", "s3://bucket/task2.txt"]
@@ -105,7 +102,6 @@ async def test_run_async_batch_s3_failure(executor, batch_request):
         patch.object(executor_module, "s3_service") as mock_s3,
         patch.object(executor_module, "webhook_service") as mock_webhook,
     ):
-
         mock_gemini.generate_content = AsyncMock(side_effect=["result1", "result2"])
         mock_s3.upload_file = AsyncMock(side_effect=Exception("S3 error"))
         mock_webhook.notify = AsyncMock(return_value=True)
@@ -156,7 +152,6 @@ async def test_run_async_batch_no_webhook(executor, batch_request):
         patch.object(executor_module, "s3_service") as mock_s3,
         patch.object(executor_module, "webhook_service") as mock_webhook,
     ):
-
         mock_gemini.generate_content = AsyncMock(side_effect=["result1", "result2"])
         mock_s3.upload_file = AsyncMock(return_value="s3://bucket/key.txt")
         mock_webhook.notify = AsyncMock()

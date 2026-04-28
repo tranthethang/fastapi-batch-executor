@@ -1,10 +1,10 @@
 from unittest.mock import AsyncMock, patch
 
 import pytest
+from app.schemas.executor import TaskResult
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.schemas.executor import TaskResult
 
 client = TestClient(app)
 
