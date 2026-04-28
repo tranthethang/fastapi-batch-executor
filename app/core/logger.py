@@ -34,6 +34,9 @@ def setup_logger(logger_instance: logging.Logger):
         handler = TimedRotatingFileHandler(
             log_filename, when="midnight", interval=1, backupCount=30, encoding="utf-8"
         )
+        # Some unit tests patch handler constructors with MagicMocks; ensure a numeric
+        # level exists so stdlib logging comparisons don't crash.
+        handler.level = logging.INFO
         handler.setFormatter(formatter)
 
         def namer(default_name):
@@ -52,6 +55,7 @@ def setup_logger(logger_instance: logging.Logger):
 
         # Console Handler
         console_handler = logging.StreamHandler()
+        console_handler.level = logging.INFO
         console_handler.setFormatter(formatter)
         logger_instance.addHandler(console_handler)
 

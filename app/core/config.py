@@ -4,9 +4,11 @@ This module uses Pydantic Settings to load and validate environment variables
 from a .env file or the system environment.
 """
 
+import os
 from pathlib import Path
 
 from pydantic import AliasChoices, Field
+from pydantic import model_validator
 from pydantic_settings import SettingsConfigDict
 from pyflow_ai_stack.core.config import Settings as BaseSettings
 from pyflow_ai_stack.services.configs import S3Config
@@ -86,6 +88,18 @@ class Settings(BaseSettings):
             endpoint_url=endpoint,
             with_path_style=bool(endpoint),
         )
+
+    @model_validator(mode="after")
+    def _prefer_s3_endpoint_url_env_over_dotenv(self) -> "Settings":
+        """
+        Pydantic env alias resolution can pick up ``S3_ENDPOINT`` from a dotenv file
+        and not override it with process env ``S3_ENDPOINT_URL`` in some situations.
+        Docker-compose injects ``S3_ENDPOINT_URL`` explicitly; prefer that when set.
+        """
+        override = os.getenv("S3_ENDPOINT_URL")
+        if override:
+            self.S3_ENDPOINT_URL = override
+        return self
 
 
 # Global singleton instance providing access to all application settings

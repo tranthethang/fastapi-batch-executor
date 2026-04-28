@@ -5,7 +5,12 @@ ensuring data integrity and providing automatic documentation.
 """
 
 from pydantic import BaseModel, model_validator
-from pyflow_ai_stack.schemas.models import BatchRequest as BaseBatchRequest
+from pyflow_ai_stack.schemas.models import (
+    BatchRequest as BaseBatchRequest,
+    GlobalFile as FileItem,
+    TaskRequest as TaskItem,
+    TaskResponse as TaskResult,
+)
 
 
 class BatchRequest(BaseBatchRequest):
@@ -51,3 +56,25 @@ class AsyncInitiateResponse(BaseModel):
 
     status: str
     message: str
+
+
+class ExecuteResponse(BaseModel):
+    """Response schema for synchronous batch execution.
+
+    Args:
+        project_id: Identifier for the grouping project.
+        results: Per-task execution results.
+    """
+
+    project_id: str
+    results: list[TaskResult]
+
+
+__all__ = [
+    "AsyncInitiateResponse",
+    "BatchRequest",
+    "ExecuteResponse",
+    "FileItem",
+    "TaskItem",
+    "TaskResult",
+]
