@@ -4,8 +4,11 @@ This module initializes the FastAPI app, configures global settings,
 registers API routers, and defines the application's startup behavior.
 """
 
+import os
+
 import uvicorn
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pyflow_ai_stack.schemas.models import HealthResponse
 
 from app.api.executor import router as executor_router
@@ -19,6 +22,19 @@ app = FastAPI(
     title="fastapi-batch-executor",
     description="Microservice for handling single and batch AI tasks using Google Gemini and AWS S3",
     version="1.0.0",
+    root_path=os.getenv("ROOT_PATH", ""),
+    openapi_url=settings.OPENAPI_JSON_PATH,
+    docs_url=settings.SWAGGER_UI_PATH,
+    redoc_url=settings.REDOC_PATH,
+)
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Register API routes

@@ -1,4 +1,3 @@
-import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -169,22 +168,22 @@ async def test_gemini_generate_content_no_model():
 @pytest.mark.asyncio
 async def test_gemini_ping_success(gemini_config):
     service = GeminiService(gemini_config)
-    mock_response = MagicMock()
-    mock_response.text = "pong"
+    # Ping calls client.aio.models.get instead of generate_content
     with patch.object(
-        service.client.aio.models, "generate_content", new_callable=AsyncMock
-    ) as mock_gen:
-        mock_gen.return_value = mock_response
+        service.client.aio.models, "get", new_callable=AsyncMock
+    ) as mock_get:
+        mock_get.return_value = AsyncMock()
         assert await service.ping() is True
 
 
 @pytest.mark.asyncio
 async def test_gemini_ping_failure(gemini_config):
     service = GeminiService(gemini_config)
+    # Ping calls client.aio.models.get instead of generate_content
     with patch.object(
-        service.client.aio.models, "generate_content", new_callable=AsyncMock
-    ) as mock_gen:
-        mock_gen.side_effect = Exception("Fail")
+        service.client.aio.models, "get", new_callable=AsyncMock
+    ) as mock_get:
+        mock_get.side_effect = Exception("Fail")
         assert await service.ping() is False
 
 
@@ -315,7 +314,7 @@ async def test_s3_service_get_file_success(s3_config):
         mock_body.read.return_value = b"file content"
         mock_s3.get_object.return_value = {"Body": mock_body}
         result = await service.get_file("key")
-        assert result == "file content"
+        assert result == b"file content"
 
 
 @pytest.mark.asyncio

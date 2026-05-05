@@ -36,13 +36,13 @@ tests/              # Comprehensive test suite
 
 2. **Create a virtual environment**:
    ```bash
-   python -m venv .venv
+   uv venv .venv --python 3.10
    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
    ```
 
 3. **Install dependencies**:
    ```bash
-   pip install -r requirements.txt
+   uv sync --dev
    ```
 
 4. **Configure environment variables**:

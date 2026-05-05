@@ -22,6 +22,11 @@ def setup_logger(logger_instance: logging.Logger):
 
     logger_instance.setLevel(logging.INFO)
 
+    # pyflow_ai_stack attaches a NullHandler so libraries stay quiet; that makes
+    # ``if not logger_instance.handlers`` false forever, so no file/console sinks
+    # were added and all INFO logs disappeared (no files under services/batch-executor/logs).
+    logger_instance.handlers.clear()
+
     if not logger_instance.handlers:
         formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 
@@ -29,6 +34,9 @@ def setup_logger(logger_instance: logging.Logger):
         handler = TimedRotatingFileHandler(
             log_filename, when="midnight", interval=1, backupCount=30, encoding="utf-8"
         )
+        # Some unit tests patch handler constructors with MagicMocks; ensure a numeric
+        # level exists so stdlib logging comparisons don't crash.
+        handler.level = logging.INFO
         handler.setFormatter(formatter)
 
         def namer(default_name):
@@ -47,6 +55,7 @@ def setup_logger(logger_instance: logging.Logger):
 
         # Console Handler
         console_handler = logging.StreamHandler()
+        console_handler.level = logging.INFO
         console_handler.setFormatter(formatter)
         logger_instance.addHandler(console_handler)
 

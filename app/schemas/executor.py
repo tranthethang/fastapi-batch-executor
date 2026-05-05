@@ -4,15 +4,13 @@ This module uses Pydantic to define the structure of requests and responses,
 ensuring data integrity and providing automatic documentation.
 """
 
-from typing import List, Literal, Optional
-
-from pydantic import BaseModel, Field, model_validator
-from pyflow_ai_stack.schemas.models import BatchRequest as BaseBatchRequest
-from pyflow_ai_stack.schemas.models import BatchResponse as ExecuteResponse
-from pyflow_ai_stack.schemas.models import GlobalFile as FileItem
-from pyflow_ai_stack.schemas.models import HealthResponse
-from pyflow_ai_stack.schemas.models import TaskRequest as TaskItem
-from pyflow_ai_stack.schemas.models import TaskResponse as TaskResult
+from pydantic import BaseModel, model_validator
+from pyflow_ai_stack.schemas.models import (
+    BatchRequest as BaseBatchRequest,
+    GlobalFile as FileItem,
+    TaskRequest as TaskItem,
+    TaskResponse as TaskResult,
+)
 
 
 class BatchRequest(BaseBatchRequest):
@@ -58,3 +56,25 @@ class AsyncInitiateResponse(BaseModel):
 
     status: str
     message: str
+
+
+class ExecuteResponse(BaseModel):
+    """Response schema for synchronous batch execution.
+
+    Args:
+        project_id: Identifier for the grouping project.
+        results: Per-task execution results.
+    """
+
+    project_id: str
+    results: list[TaskResult]
+
+
+__all__ = [
+    "AsyncInitiateResponse",
+    "BatchRequest",
+    "ExecuteResponse",
+    "FileItem",
+    "TaskItem",
+    "TaskResult",
+]

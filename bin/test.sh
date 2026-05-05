@@ -1,6 +1,5 @@
 #!/bin/bash
 cd "$(dirname "$0")/.."
-source .venv/bin/activate &&
 
-# Chạy pytest với coverage cho app và tạo báo cáo HTML
-python -m pytest --cov=app --cov-report=term tests/
+# Chạy pytest với coverage cho app sử dụng uv và PYTHONPATH=.
+PYTHONPATH=. uv run pytest --cov=app --cov-report=term --cov-fail-under=90 tests/
